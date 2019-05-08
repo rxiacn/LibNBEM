@@ -1,0 +1,161 @@
+OpenPR-NBEM V1.20
+
+Available at http://www.openpr.org.cn/
+
+Please read the LICENSE file before using OpenPR-NBEM.
+
+
+Table of Contents
+=================
+- Introduction
+- Updates
+- Installation
+- Data Format
+- Usage
+- Examples
+- Additional Information
+
+
+Introduction
+============
+OpenPR-NBEM is an C++ implementation of Naive Bayes Classifer, which is 
+a well-known generative classification algorithm for the application 
+such as text classification. The Naive Bayes algorithm requires the 
+probatilistic distribution to be discrete. OpenPR-NBEM uses the multinomail 
+event model for representation. The maximum likelihood estimate is used for 
+supervised learning, and the expectation-maximization estimate is used for
+semi-supervised and un-supervised learning.
+
+
+Updates
+=======
+V1.20: Remove the relax parameter alpha;
+       Add lenght normalization, class prior, and class-conditional feature prior.
+
+V1.10: Add an evaluation function to compute Precision, Recall, and F-score for each class.
+
+V1.09: Add a parameter: alpha, to relex the probability output.
+
+V1.08: Combine the Class of NB and NBEM into one new NBEM class.
+
+V1.07: Fix some bugs in reading samples.
+
+
+
+Installation
+============
+
+On Linux system, type `make' to build the `nb_learn', `nb_classify', 'nb_ssl',
+and 'nb_usl' programs. Run them without arguments to show the usages of them.
+
+On Windows system, consult `Makefile' to build them, or use the pre-built
+binaries (in the directory `windows').
+
+
+Data Format
+===========
+
+The format of training and testing data file is:
+
+# class_num feature_num
+<label>	<index1>:<value1> <index2>:<value2> ...
+.
+.
+.
+
+The first line should start with '#', and then the class number and feature number.
+Each of the following lines represents an instance and is ended by a '\n' character.
+
+<label> is a integer indicating the class id. The range of class id should be
+from 1 to the size of classes. For example, the class id is 1, 2, 3 and 4 for 
+a 4-class classification problem.
+ 
+<label> and <index>:<value> are sperated by a '\t' character. <index> is a postive
+integer denoting the feature id. The range of feature id should be from 1 to the size
+of feature set. For example, the feature id is 1, 2, ... 9 or 10 if the dimension of
+feature set is 10. Indices must be in ASCENDING order. <value> is a float denoting the 
+feature value. The value must be a INTEGER since Naive Bayes Algorithm requires the 
+probatilistic distribution to be discrete.
+
+If the feature value equals 0, the <index>:<value> is encourged to be neglected
+for the consideration of storage space and computational speed.
+
+Labels of the unlabeled data should be 0. And the labels in the testing file are 
+only used to calculate accuracy or errors. 
+
+
+Usuage
+======
+
+OpenPR-NBEM supervised learning module
+
+usage: nb_learn [options] training_file model_file
+
+options: -h        -> help
+
+
+OpenPR-NBEM semi-supervised learning module
+
+usage: nbem_ssl [options] labeled_file unlabeled_file model_file test_file output_file
+options: -h        -> help
+         -l float  -> The turnoff weight for unlabeled set (default 1)
+         -n int    -> Maximal iteration steps (default: 20)
+         -m float  -> Minimal increase rate of loglikelihood (default: 1e-4)
+         
+         
+OpenPR-NBEM un-supervised learning module
+
+usage: nbem_usl [options] initial_model_file unlabeled_file model_file test_file outputfile
+options: -h        -> help
+         -n int    -> Maximal iteration steps (default: 20)
+         -m float  -> Minimal increase rate of loglikelihood (default: 1e-4)
+         
+
+OpenPR-NBEM classification module
+
+usage: nb_classify [options] testing_file model_file output_file
+
+options: -h        -> help
+         -f [0..2] -> 0: only output class label (default)
+                   -> 1: output class label with log-likelihood
+                   -> 2: output class label with probability
+
+
+Examples
+========
+
+The "data" directory contains a dataset of text classification task. This dataset 
+has six class labels and more than 250,000 features. 
+
+For supervised learning from labeled data:
+
+> nb_learn data/train.samp data/nb.mod
+
+For semi-supervised learning for both labeled and unlabeled data using EM algorithm:
+
+> nbem_ssl data/train.samp data/unlabel.samp data/nbem_ssl.mod
+
+For semi-supervised learning for both labeled and unlabeled data using EM-lambda algorithm:
+
+> nbem_ssl -l 0.1 data/train.samp data/unlabel.samp data/nbem_ssl1.mod
+
+For semi-supervised learning with EM-lambda algorithm and fixed iteration stop condition:
+
+> nbem_ssl -l 0.1 -m 0.01 data/train.samp data/unlabel.samp data/nbem_ssl2.mod
+
+For un-supervised learning from unlabled data with an initial model:
+
+> nbem_usl data/init.mod data/unlabel.samp data/nb_usl.mod
+
+For classifing with the loglikelihood output:
+
+> nb_classify -f 1 data/test.samp data/nb.mod data/nb.out
+> nb_classify -f 1 data/test.samp data/nbem_ssl.mod data/nbem_ssl.out
+> nb_classify -f 1 data/test.samp data/nbem_usl.mod data/nbem_usl.out
+
+
+Additional Information
+======================
+
+For any questions and comments, please email rxiacn@gmail.com.
+
